@@ -1,0 +1,24 @@
+# ASCII Spatial Graph 
+# TARDIS - Transformer And Rapid Dimensionless Instance Segmentation (R) 
+# tardis_em-pytorch v0.3.10  
+# MIT License * 2021-2026 * Robert Kiewisz & Tristan Bepler 
+Robert Kiewisz & Tristan Bepler 
+ 
+Directory: TS_00004_sq_df_sorted.mrc 
+Output Format: None_csv 
+Predict: Actin 
+Device: cuda:0 
+ 
+----Semantic Segmentation---- 
+CNN type: fnet_attn V_3  
+CNN threshold: 0.25 
+CNN predicted with 4x 90 degrees rotations: True 
+ 
+----Instance Segmentation---- 
+DIST 2D model 
+ 
+Maximum number of points used in single DIST run: 900 
+ 
+Semantic Prediction: TS_00004_sq_df_sorted | Number of pixels: 568594 
+Instance Prediction: TS_00004_sq_df_sorted; Number of segments: 382.0 
+Instance Prediction: TS_00004_sq_df_sorted; Number of segments: 238.0
