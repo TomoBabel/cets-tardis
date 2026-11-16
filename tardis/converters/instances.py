@@ -18,9 +18,11 @@ from tardis.utils.utils import (
     validate_file,
     resolve_target,
     read_instances_csv,
+    write_instances_csv,
     gen_annotated_object,
     gen_coordinate_systems,
     gen_array_to_physical,
+    get_voxel_size,
 )
 
 
@@ -120,6 +122,80 @@ class TardisInstanceSegmentation:
         if target in FILAMENT_TARGETS:
             return Spline3D(annotation_type=AnnotationType.spline_3D, **common_fields)
         return PointSet3D(annotation_type=AnnotationType.point_set_3D, **common_fields)
+
+    def cets_to_tardis(
+        self,
+        instances: PointSet3D | Spline3D,
+        output_directory: os.PathLike,
+        tomo_name: str,
+        pixel_size: float | None = None,
+        filtered: bool = False,
+    ) -> Path:
+        """Writes the instances of a CETS ``PointSet3D`` (membranes) or ``Spline3D``
+        (filaments) annotation as a Tardis instances csv (``<tomo_name>_instances.csv`` or,
+        with ``filtered``, ``<tomo_name>_instances_filter.csv``).
+
+        Each point becomes a row [instance id, x, y, z], in the order of the annotation
+        (which, for filaments, is the order of the points along each spline):
+
+        * instance id: ``instance_ids``. 0 for all the points if the annotation has none
+          (a single instance).
+        * x, y, z: ``origin3D`` (voxels) multiplied by the pixel size, as Tardis writes the
+          coordinates in Å referred to the bottom left corner of the tomogram. Going through
+          voxels may change the last digit of the values Tardis wrote.
+
+        The segmented target is not written: Tardis records it in the prediction_log.txt of
+        the run, not in the csv.
+
+        :param instances: the instances annotation.
+        :type instances: PointSet3D or Spline3D.
+
+        :param output_directory: directory in which the csv will be written (natively, the
+        Predictions directory of the run).
+        :type output_directory: os.PathLike.
+
+        :param tomo_name: name of the tomogram in the Tardis file names: the name of the
+        input tomogram file without extension.
+        :type tomo_name: str.
+
+        :param pixel_size: sampling rate (Å/px) of the tomogram. If given, it is used;
+        otherwise it is taken from the annotation. A ValueError is raised without any of
+        them.
+        :type pixel_size: float, optional. Defaults to None.
+
+        :param filtered: whether the instances are the length-filtered filaments, which
+        Tardis writes in a different file.
+        :type filtered: bool, optional. Defaults to False.
+
+        :returns: the path of the csv written.
+        """
+        if pixel_size is not None and pixel_size <= 0:
+            raise ValueError(f"The pixel size must be positive. Got: {pixel_size}")
+        voxel_size = pixel_size or get_voxel_size(instances)
+        if not voxel_size:
+            raise ValueError(
+                f"No pixel size was provided and the annotation [{instances.id}] does not "
+                f"contain it."
+            )
+        origin_3d = instances.origin3D or []
+        if not origin_3d:
+            raise ValueError(f"The annotation [{instances.id}] has no points.")
+        instance_ids = instances.instance_ids or [0] * len(origin_3d)
+        if len(instance_ids) != len(origin_3d):
+            raise ValueError(
+                f"The annotation [{instances.id}] has {len(origin_3d)} points, but "
+                f"{len(instance_ids)} instance ids."
+            )
+        suffix = INSTANCES_FILTER_SUFFIX if filtered else INSTANCES_SUFFIX
+        out_dir = Path(output_directory).expanduser()
+        out_dir.mkdir(parents=True, exist_ok=True)
+        csv_path = write_instances_csv(
+            out_dir / f"{tomo_name}{suffix}{CSV_EXT}",
+            instance_ids,
+            [[c * voxel_size for c in coord] for coord in origin_3d],
+        )
+        print(f"instances csv successfully written! -> {csv_path}")
+        return csv_path
 
     @staticmethod
     def get_tomo_name(instances_csv: os.PathLike) -> str:

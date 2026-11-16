@@ -116,3 +116,10 @@ for prediction in predictions:
         )
         if instances is not None:
             write_instances_yaml(instances, scratch_dir)
+            # CETS -> Tardis: the same instances written back as a csv
+            instances_converter.cets_to_tardis(
+                instances,
+                scratch_dir / "cets_to_tardis" / instances.id,
+                tomo_name=tomo_id,
+                filtered=TardisInstanceSegmentation.is_filtered(instances_csv),
+            )

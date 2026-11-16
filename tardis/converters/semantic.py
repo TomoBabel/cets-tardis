@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 from cets_data_model.models.models import (
     SegmentationMask3D,
@@ -7,13 +8,20 @@ from cets_data_model.models.models import (
     AnnotationType,
 )
 from cets_data_model.utils.image_utils import get_mrc_info
-from tardis.constants import MRC_EXT, SEMANTIC_LABEL_VALUE, TardisTarget
+from tardis.constants import (
+    MRC_EXT,
+    SEMANTIC_LABEL_VALUE,
+    SEMANTIC_SUFFIX,
+    TardisTarget,
+)
 from tardis.utils.utils import (
     validate_file,
     resolve_target,
     gen_annotated_object,
     gen_coordinate_systems,
     gen_array_to_physical,
+    get_voxel_size,
+    export_mrc,
 )
 
 
@@ -90,6 +98,53 @@ class TardisSemanticSegmentation:
             depth=mrc_info.size_z,
             coordinate_systems=[array_cs, physical_cs],
             coordinate_transformations=[array_to_physical],
+        )
+
+    def cets_to_tardis(
+        self,
+        mask: SegmentationMask3D,
+        output_directory: os.PathLike,
+        tomo_name: str,
+        copy: bool = False,
+    ) -> Path:
+        """Makes the mask of a CETS semantic ``SegmentationMask3D`` annotation available with
+        the name Tardis gives it (``<tomo_name>_semantic.mrc``).
+
+        The mask itself is the mrc file the annotation points to, so nothing is converted: it
+        is linked, or copied if requested or if the sampling rate of its header is not the
+        one of the annotation (the header of the copy is then updated).
+
+        The segmented target is not written: Tardis records it in the prediction_log.txt of
+        the run, not in the mask.
+
+        :param mask: the semantic mask annotation.
+        :type mask: SegmentationMask3D.
+
+        :param output_directory: directory in which the mask will be written (natively, the
+        Predictions directory of the run).
+        :type output_directory: os.PathLike.
+
+        :param tomo_name: name of the tomogram in the Tardis file names: the name of the
+        input tomogram file without extension.
+        :type tomo_name: str.
+
+        :param copy: copy the mask instead of linking it.
+        :type copy: bool, optional. Defaults to False.
+
+        :returns: the path of the mask.
+        """
+        if mask.segmentation_type not in (None, SegmentationType.semantic.value):
+            raise ValueError(
+                f"The annotation [{mask.id}] is a segmentation of type "
+                f"'{mask.segmentation_type}', not a semantic one."
+            )
+        if not mask.path:
+            raise ValueError(f"The annotation [{mask.id}] has no file.")
+        return export_mrc(
+            mask.path,
+            Path(output_directory) / f"{tomo_name}{SEMANTIC_SUFFIX}{MRC_EXT}",
+            voxel_size=get_voxel_size(mask),
+            copy=copy,
         )
 
     @staticmethod

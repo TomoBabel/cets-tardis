@@ -1,7 +1,9 @@
 import os
+import shutil
 from pathlib import Path
-from typing import List, Tuple
+from typing import List, Optional, Sequence, Tuple
 
+import mrcfile
 import numpy as np
 import yaml
 
@@ -170,3 +172,66 @@ def read_instances_csv(
     instance_ids = [int(row[0]) for row in data]
     coords = [[float(row[1]), float(row[2]), float(row[3])] for row in data]
     return instance_ids, coords
+
+
+def write_instances_csv(
+    csv_file: os.PathLike,
+    instance_ids: Sequence[int],
+    coords_angst: Sequence[Sequence[float]],
+) -> Path:
+    """Writes a Tardis instances csv: the header and one row [instance id, x, y, z] per
+    point, with the coordinates in Å referred to the bottom left corner of the tomogram.
+    As Tardis does, the instance ids are written as floats and the values with all their
+    digits."""
+    csv_path = Path(csv_file)
+    with open(csv_path, "w") as f:
+        f.write(",".join(INSTANCES_CSV_HEADER) + "\n")
+        for instance_id, coord in zip(instance_ids, coords_angst):
+            row = [float(instance_id), *(float(c) for c in coord)]
+            f.write(",".join(repr(value) for value in row) + "\n")
+    return csv_path
+
+
+def get_voxel_size(
+    cets_obj: SegmentationMask3D | PointSet3D | Spline3D,
+) -> Optional[float]:
+    """Voxel size (Å) of a CETS annotation: the scale of its ``array_to_physical``
+    transformation. None if it has none."""
+    for transformation in cets_obj.coordinate_transformations or []:
+        if isinstance(transformation, Scale) and transformation.scale:
+            return float(transformation.scale[0])
+    return None
+
+
+def export_mrc(
+    mrc_file: os.PathLike,
+    out_file: os.PathLike,
+    voxel_size: Optional[float] = None,
+    copy: bool = False,
+) -> Path:
+    """Makes an mrc file available with another name: as a symbolic link, unless a copy is
+    requested or needed.
+
+    :param voxel_size: voxel size (Å) the file must have in its header. If it is not the one
+    of ``mrc_file``, the file is copied and its header updated, instead of linked.
+    """
+    src = validate_file(mrc_file, expected_ext=Path(mrc_file).suffix)
+    dst = Path(out_file).expanduser()
+    if dst.exists() or dst.is_symlink():
+        if dst.resolve() == src:
+            return dst
+        raise FileExistsError(f"{dst} already exists")
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    with mrcfile.open(src, header_only=True, permissive=True) as mrc:
+        header_voxel_size = float(mrc.voxel_size.x)
+    fix_header = voxel_size is not None and not np.isclose(
+        header_voxel_size, voxel_size, rtol=1e-4
+    )
+    if not (copy or fix_header):
+        dst.symlink_to(src)
+        return dst
+    shutil.copyfile(src, dst)
+    if fix_header:
+        with mrcfile.open(dst, mode="r+", header_only=True, permissive=True) as mrc:
+            mrc.voxel_size = voxel_size
+    return dst
