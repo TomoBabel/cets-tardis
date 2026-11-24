@@ -1,0 +1,53 @@
+---
+width: 232
+height: 232
+depth: 125
+coordinate_systems:
+- name: emd_10439_array
+  axes:
+  - name: x
+    axis_unit: pixel
+    axis_type: array
+  - name: y
+    axis_unit: pixel
+    axis_type: array
+  - name: z
+    axis_unit: pixel
+    axis_type: array
+- name: emd_10439_physical
+  axes:
+  - name: x
+    axis_unit: angstrom
+    axis_type: space
+  - name: y
+    axis_unit: angstrom
+    axis_type: space
+  - name: z
+    axis_unit: angstrom
+    axis_type: space
+coordinate_transformations:
+- transformation_type: scale
+  name: array_to_physical
+  input: emd_10439_array
+  output: emd_10439_physical
+  scale:
+  - 54.72000016837284
+  - 54.72000016837284
+  - 54.72000016837284
+path: ./membranes/Predictions/emd_10439_semantic.mrc
+id: tardis_membrane_semantic_emd_10439
+annotation_type: segmentation_mask_3D
+name: Tardis Membrane semantic segmentation for emd_10439
+source_tomogram_id: emd_10439
+annotated_object:
+  feature_type: GO:0016020
+  name: null
+  description: null
+derived_from_annotation_id: null
+segmentation_type: semantic
+labels:
+- label_value: 1
+  annotated_object:
+    feature_type: GO:0016020
+    name: null
+    description: null

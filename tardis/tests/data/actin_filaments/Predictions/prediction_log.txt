@@ -5,7 +5,7 @@
 Robert Kiewisz & Tristan Bepler 
  
 Directory: TS_00004_sq_df_sorted.mrc 
-Output Format: None_csv 
+Output Format: mrc_csv 
 Predict: Actin 
 Device: cuda:0 
  
@@ -19,6 +19,6 @@ DIST 2D model
  
 Maximum number of points used in single DIST run: 900 
  
-Semantic Prediction: TS_00004_sq_df_sorted | Number of pixels: 568594 
-Instance Prediction: TS_00004_sq_df_sorted; Number of segments: 382.0 
-Instance Prediction: TS_00004_sq_df_sorted; Number of segments: 238.0
+Semantic Prediction: TS_00004_sq_df_sorted | Number of pixels: 568584 
+Instance Prediction: TS_00004_sq_df_sorted; Number of segments: 387.0 
+Instance Prediction: TS_00004_sq_df_sorted; Number of segments: 254.0

@@ -8,7 +8,7 @@ import mrcfile
 import numpy as np
 
 from tardis.constants import TardisTarget
-from tardis.tests import write_prediction_log
+from tardis.tests import write_log
 from tardis.utils.discovery import find_tardis_predictions
 
 
@@ -40,7 +40,7 @@ class TardisDiscoveryTest(TestCase):
         grouped by tomogram. Tardis run on a directory writes several tomograms in it."""
         preds = self.test_dir / "run" / "Predictions"
         preds.mkdir(parents=True)
-        write_prediction_log(preds, TardisTarget.actin.value)
+        write_log(preds, TardisTarget.actin.value)
         sem_a = self._touch("run/Predictions/TS_01_semantic.mrc")
         raw_a = self._touch("run/Predictions/TS_01_instances.csv")
         filt_a = self._touch("run/Predictions/TS_01_instances_filter.csv")
@@ -65,7 +65,7 @@ class TardisDiscoveryTest(TestCase):
     def test_membrane_prefers_all_instances(self) -> None:
         preds = self.test_dir / "Predictions"
         preds.mkdir()
-        write_prediction_log(preds, TardisTarget.membrane.value)
+        write_log(preds, TardisTarget.membrane.value)
         raw = self._touch("Predictions/T_instances.csv")
         self._touch("Predictions/T_instances_filter.csv")
         (prediction,) = find_tardis_predictions(self.test_dir)
@@ -76,7 +76,7 @@ class TardisDiscoveryTest(TestCase):
         the Predictions directory, else unknown"""
         preds = self.test_dir / "Predictions"
         preds.mkdir()
-        write_prediction_log(preds, TardisTarget.actin.value)
+        write_log(preds, TardisTarget.actin.value)
         self._touch("Predictions/T_instances.csv")
         (prediction,) = find_tardis_predictions(self.test_dir)
         self.assertIsNone(prediction.input_tomogram)

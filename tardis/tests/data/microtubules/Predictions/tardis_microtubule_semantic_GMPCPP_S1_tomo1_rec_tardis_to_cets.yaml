@@ -1,0 +1,53 @@
+---
+width: 512
+height: 512
+depth: 100
+coordinate_systems:
+- name: GMPCPP_S1_tomo1_rec_array
+  axes:
+  - name: x
+    axis_unit: pixel
+    axis_type: array
+  - name: y
+    axis_unit: pixel
+    axis_type: array
+  - name: z
+    axis_unit: pixel
+    axis_type: array
+- name: GMPCPP_S1_tomo1_rec_physical
+  axes:
+  - name: x
+    axis_unit: angstrom
+    axis_type: space
+  - name: y
+    axis_unit: angstrom
+    axis_type: space
+  - name: z
+    axis_unit: angstrom
+    axis_type: space
+coordinate_transformations:
+- transformation_type: scale
+  name: array_to_physical
+  input: GMPCPP_S1_tomo1_rec_array
+  output: GMPCPP_S1_tomo1_rec_physical
+  scale:
+  - 31.600000381469727
+  - 31.600000381469727
+  - 31.600000381469727
+path: ./microtubules/Predictions/GMPCPP_S1_tomo1_rec_semantic.mrc
+id: tardis_microtubule_semantic_GMPCPP_S1_tomo1_rec
+annotation_type: segmentation_mask_3D
+name: Tardis Microtubule semantic segmentation for GMPCPP_S1_tomo1_rec
+source_tomogram_id: GMPCPP_S1_tomo1_rec
+annotated_object:
+  feature_type: GO:0005874
+  name: null
+  description: null
+derived_from_annotation_id: null
+segmentation_type: semantic
+labels:
+- label_value: 1
+  annotated_object:
+    feature_type: GO:0005874
+    name: null
+    description: null

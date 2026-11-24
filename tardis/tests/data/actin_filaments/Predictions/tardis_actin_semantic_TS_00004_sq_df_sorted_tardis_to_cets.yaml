@@ -1,0 +1,53 @@
+---
+width: 464
+height: 464
+depth: 312
+coordinate_systems:
+- name: TS_00004_sq_df_sorted_array
+  axes:
+  - name: x
+    axis_unit: pixel
+    axis_type: array
+  - name: y
+    axis_unit: pixel
+    axis_type: array
+  - name: z
+    axis_unit: pixel
+    axis_type: array
+- name: TS_00004_sq_df_sorted_physical
+  axes:
+  - name: x
+    axis_unit: angstrom
+    axis_type: space
+  - name: y
+    axis_unit: angstrom
+    axis_type: space
+  - name: z
+    axis_unit: angstrom
+    axis_type: space
+coordinate_transformations:
+- transformation_type: scale
+  name: array_to_physical
+  input: TS_00004_sq_df_sorted_array
+  output: TS_00004_sq_df_sorted_physical
+  scale:
+  - 26.960000926050647
+  - 26.960000926050647
+  - 26.960000926050647
+path: ./actin_filaments/Predictions/TS_00004_sq_df_sorted_semantic.mrc
+id: tardis_actin_semantic_TS_00004_sq_df_sorted
+annotation_type: segmentation_mask_3D
+name: Tardis Actin semantic segmentation for TS_00004_sq_df_sorted
+source_tomogram_id: TS_00004_sq_df_sorted
+annotated_object:
+  feature_type: GO:0005884
+  name: null
+  description: null
+derived_from_annotation_id: null
+segmentation_type: semantic
+labels:
+- label_value: 1
+  annotated_object:
+    feature_type: GO:0005884
+    name: null
+    description: null
